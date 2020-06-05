@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/register.css"/>
+		<title>欢迎注册心电图管理系统!</title> 
+    <script type="text/javascript" src="angularjs/angular.min.js"></script>
+    <script type="text/javascript" src="jQuery/jquery-2.2.3.min.js"></script>
+    <script type="text/javascript">
+    
+      var uri = "http://localhost:8082/";
+    	var app = angular.module('userApp',[]);
+    	app.controller('userController',function($scope,$http){
+    		$scope.msg="";
+    		$scope.name="";
+    		$scope.pwd="";
+        
+    		$scope.onSubmit = function(){
+    			var name = document.getElementById("userName").value;
+    			var pwd = document.getElementById("password").value;
+    			var pwd2 = document.getElementById("pwd2").value;
+    			
+    			if(name == ""){ 
+    				$scope.msg="账号不能为空！";
+    			}else if(pwd == ""){
+    				$scope.msg="密码不能为空！";
+    			}else if(pwd2 == ""){
+    				$scope.msg="确认密码不能为空！";
+    			}else if(pwd2 != pwd){
+    				$scope.msg="确认密码跟密码不一样！";
+    			}else{
+    				$http.get(uri+'findByUserName/'+name).success(function(response){
+    					if(response.userName==null){
+                  $http.post(uri+'addUsers', $scope.entity).success(function(response){
+                    if(response.success==true){
+                      $scope.msg="你已注册成功！";
+                      location.href="Z-daohang.html";
+                    }else{
+                      $scope.msg="注册失败！";
+                    }
+                });
+    					}else{
+    						$scope.msg="账户已注册！";
+    					}
+    				});	
+    		}
+    	}
+      });
+    </script>
+	</head>
+
+	<body id="app" ng-app="userApp" ng-controller="userController">
+		<!-- <img class="i1" src="img/bg3.jpg"> -->
+		<div id="right">
+			<h2><strong>Register</strong></h2>
+
+<div class="footer">
+  <div class="footer-left">
+    <a href="admin-register.html"><h2><strong>Admin</strong></h2></a>
+  </div>
+  <div class="footer-right"> <a href="doc-register.html"><h2><strong>Doctor</strong></h2></a></div>
+</div>
+
+       
+
+				<div>
+					<input type="text" id="userName" class="text" placeholder="请输入账号" ng-model="entity.userName"/><br /><br>
+					<input type="password" id="password" class="text" name="password" placeholder="请输入密码" ng-model="entity.password"/><br /><br>
+					<input type="password" placeholder="请再次输入密码" class="text" id="pwd2" name="password2"><br><br>
+					
+					<br>
+					<div id="register-group">
+					  <input type="submit" class="button" value="注 册" ng-click="onSubmit()"></input>
+            <p style="color: red;" ng-model="msg">{{msg}}</p>
+					</div>
+					
+					已有账号？去<a href="index.html">登录</a>
+				</div>
+
+   
+		</div>
+	</body>
+</html>

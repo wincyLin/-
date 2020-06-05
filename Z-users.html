@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+
+		<title>用户管理</title>
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="adminLTE/css/AdminLTE.css"/>
+		<link  rel="stylesheet" href="adminLTE/css/skins/_all-skins.css"/>
+		<link  rel="stylesheet" href="angularjs/pagination.css"/>
+		<link rel="stylesheet" type="text/css" href="css/mate.css"/>
+		<script type="text/javascript" src="jQuery/jquery-2.2.3.min.js"></script>
+		<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="angularjs/angular.min.js"></script>
+		<script type="text/javascript" src="angularjs/pagination.js"></script>
+		<script type="text/javascript">
+		var uri = "http://localhost:8082/";
+		var app = angular.module('userApp', ['pagination']);
+		app.controller('userController', function($scope, $http) {
+			$scope.findAllUsers = function() {
+		
+				$http.get(uri + 'findAllUsers').success(function(response) {
+					$scope.usersList = response;
+				});
+				console.log(1)
+			}
+		
+			$scope.save = function() {
+				var methodName = "addUsers";
+		
+				if ($scope.entity.userId != null) {
+					methodName = "updateUsers";
+				}
+				$http.post(uri + methodName, $scope.entity).success(function(response) {
+					if (response.success = true) {
+						$scope.reloadList();
+					} else {
+						alert("操作失败！");
+					}
+				});
+			}
+		
+			$scope.findOneUser = function(userId) {
+				$http.get(uri + 'findOneUser/' + userId).success(function(response) {
+					$scope.entity = response;
+				});
+				console.log($scope.entity)
+			}
+		
+			$scope.selectedIds = [];
+		
+			$scope.selectionUpdate = function(userId, $event) {
+				if ($event.target.checked) {
+					$scope.selectedIds.push(userId);
+				} else {
+					var index = $scope.selectedIds.indexOf(userId);
+					$scope.selectedIds.splice(index, 1);
+				}
+			}
+		
+			$scope.dele = function() {
+				if (confirm('你确定要删除该信息吗？')) {
+					$http.get(uri + 'deleteUsers?userIds=' + $scope.selectedIds).then(function(response) {
+						console.log($scope.selectedIds)
+						$scope.entity = response;
+						if (response) {
+							$scope.reloadList();
+							console.log($scope.selectedIds)
+						} else {
+							alert('操作失败！');
+						}
+					});
+		
+				}
+			}
+		
+			$scope.paginationConf = {
+				currentPage: 1,
+				totalItems: 5,
+				itemsPerPage: 5,
+				perPageOptions: [5, 10, 20, 30, 40, 50],
+				onChange: function() {
+					$scope.reloadList();
+				}
+			}
+		
+			$scope.reloadList = function() {
+				$scope.findByPage($scope.paginationConf.currentPage, $scope.paginationConf.itemsPerPage);
+		
+			}
+		
+		
+			$scope.findByPage = function(page_no, page_size) {
+				$http.get(uri + 'findByPage?pageNo=' + page_no + '&pageSize=' + page_size).success(function(response) {
+					$scope.usersList= response.rows;
+					$scope.paginationConf.totalItems = response.total;
+				});
+			}
+		
+	
+		
+		});
+		</script>
+	</head>
+	<body class="hold-transition skin-red sidebar-mini" ng-app="userApp" ng-controller="userController" ng-init="findAllUsers">
+		<div id="box-body">
+	
+			<div class="btn-group">
+			<!-- SEARCH FORM -->
+			<form class="form-inline ml-3">
+			  <div class="input-group input-group-sm">
+			    <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" style="height: 35px;background-color: #F0F0F0;border: transparent;">
+			    <div class="input-group-append">
+			      <button class="btn btn-navbar" type="submit">
+			        <i class="fas fa-search"></i>
+			      </button>
+			    </div>
+			  </div>
+			</form>
+			<div class="pull-left">
+				<div class="form-group form-inline">
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" title="新建"
+							data-toggle="modal" data-target="#editModal" ng-click="entity={}">
+							<i class="fas fa-file-o"></i> 新建
+						</button>
+						<button type="button" class="btn btn-default" title="删除" ng-click="dele()">
+							<i class="fas fa-trash-o"></i> 删除
+						</button>
+						<button type="button" class="btn btn-default" title="刷新"
+							onclick="window.location.reload();">
+							<i class="fas fa-refresh"></i> 刷新
+						</button>
+					</div>
+				</div>
+			</div>
+			</div>
+			<div class="box-tools pull-right">
+				<div class="has-feedback"></div>
+			</div>
+				<table class="table table-bordered table-striped">
+					<tr>
+						<th class="" style="padding-right: 0px"></th>
+						<th>用户ID</th>
+						<th>用户名</th>
+						<th></th>
+					</tr>
+					<tr ng-repeat="entity in usersList">
+						<td><input type="checkbox" ng-click="selectionUpdate(entity.userId,$event)"/></td>
+						<td>{{entity.userId}}</td>
+						<td>{{entity.userName}}</td>&nbsp;&nbsp;
+						
+						<td><button type="button" data-toggle="modal" data-target="#editModal" ng-click="findOneUser(entity.userId)">修改</button></td>
+					</tr>
+				</table>
+				<tm-pagination conf="paginationConf"></tm-pagination>
+			</div>
+      </div>
+			
+			<!-- 编辑窗口 -->
+			<div class="modal fade" id="editModal" tabindex="-1" role="dialog"
+				aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"
+								aria-hidden="true">×</button>
+							<h3 id="myModalLabel">编辑</h3>
+						</div>
+						<div class="modal-body">
+							<table class="table table-bordered table-striped" width="800px">
+								<tr>
+									<td>用户名称</td>
+									<td><input  class="form-control" ng-model="entity.userName" placeholder="用户名称" ></td>
+								</tr>		
+							</table>
+						</div>
+						
+						
+						<div class="modal-footer">
+							<button class="btn btn-success" data-dismiss="modal"
+								aria-hidden="true" ng-click="save()">保存</button>
+							<button class="btn btn-default" data-dismiss="modal"
+								aria-hidden="true">关闭</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>

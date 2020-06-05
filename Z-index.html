@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/index.css"/>
+		<title>欢迎登陆心电图管理系统!</title>
+    <script type="text/javascript" src="angularjs/angular.min.js"></script>
+    <script src="jQuery/jquery-2.2.3.min.js"></script>
+    <script type="text/javascript">
+          var base_url="http://localhost:8082/";
+    			var app=angular.module('usersApp',[]);
+    			app.controller('usersController',function($scope,$http){
+    				$scope.msg="";
+    				$scope.acct="";
+    				$scope.pawd="";
+    				
+    			//登录
+    			$scope.denglu=function(){
+            var acct = document.getElementById("name").value;
+            var pawd = document.getElementById("pwd").value; 
+            
+    				if(acct==""){
+    					$scope.msg="请输入帐号！";
+    				}else if(pawd==""){
+    					$scope.msg="请输入密码!";
+    				}else{
+    					
+    			     	$http.get(base_url+'findByUserName/'+acct).success(function(response){
+    			     	if(response.userName==acct){
+    			     			if(response.password==pawd){
+                      
+                        sessionStorage.setItem("userName",$scope.userName);          //将数据存入sessionStorage
+    										location.href = "Z-daohang.html";
+    								}else{
+    									$scope.msg="密码错误！";
+    								}	
+    						}else{
+    							$scope.msg="无此账号，请注册！";
+    						}
+    					});
+    				}
+    			}
+            	});
+
+    				</script>
+	</head>
+	<body ng-app="usersApp" ng-controller="usersController">
+		<div id="right">
+			<h2><strong>Login</strong></h2>
+	
+				<div>
+					
+					<input type="text" class="text" id="name" placeholder="请输入账号" ng-model="userName"/><br /><br>
+					<input type="password" class="text" id="pwd" placeholder="请输入密码" ng-model="password"/><br /><br>
+					<input type="checkbox" name="checkbox" id="checkbox" value="" /><p>记住密码</p>
+					<input type="submit"class="button" value="立即登录" ng-click="denglu()"></input>
+          <p id="p1" style="color: red;" ng-model="msg">{{msg}}</p>
+					没有账号？去<a href="Z-register.html">注册</a>
+          
+					
+				</div>
+		
+		</div>
+	</body>
+</html>

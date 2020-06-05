@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>管理</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="adminLTE/css/AdminLTE.css" />
+    <link rel="stylesheet" href="adminLTE/css/skins/_all-skins.css" />
+    <link rel="stylesheet" href="angularjs/pagination.css" />
+    <link rel="stylesheet" href="css/daohang.css" />
+    <link rel="stylesheet" href="css/style.css">
+ 	<script src="jQuery/jquery-2.2.3.min.js"></script>
+ 	<script src="bootstrap/js/bootstrap.min.js"></script>
+ 	
+   
+    <script type="text/javascript" src="angularjs/angular.min.js"></script> 
+    <script type="text/javascript" src="angularjs/pagination.js"></script>
+    <script type="text/javascript">
+    	
+    	var uri = "http://localhost:8082/";
+    
+    
+    	var app = angular.module('AdverApp', ['pagination']);
+    	
+    
+    
+    	app.controller('AdverController', function($scope, $http) {
+    		
+    		var uploadService = {
+    		uploadFile:function(){
+				// 向后台传递数据:
+				var formData = new FormData();
+				// 向formData中添加数据:
+				formData.append("file",file.files[0]);
+				
+				return $http({
+					method:'post',
+					url:'http://localhost:8083/uploadFile',
+					data:formData,
+					headers:{'Content-Type':undefined} ,// Content-Type : text/html  text/plain
+					transformRequest: angular.identity
+				});
+			}
+    	}
+    
+    		$scope.findAllInfo = function() {
+    			$http.get(uri + 'findAllInfo').success(function(response) {
+    				$scope.list = response;
+    				console.log($scope.list)
+    				$scope.findContentCategoryList();
+    			});
+    			
+    		}
+    
+    		$scope.save = function() {
+    			var methodName = "addInfo";
+    			if($scope.entity.id != null) {
+    				methodName = "updateInfo";
+    
+    			}
+    			$http.post(uri + methodName, $scope.entity).success(function(response) {
+    				if(response.success=true) {
+    					$scope.findAllInfo();
+    					window.location.reload();
+    				} else {
+    					alert('操作失败！');
+    				}
+    			});
+    		}
+    		
+    
+    		$scope.findOneInfo = function(id) {
+    			$http.get(uri + 'findOneInfo?id=' + id).success(function(response) {
+    				$scope.entity = response;
+    				console.log(response)
+    			});
+    			 
+    
+    		}
+    
+    		$scope.selectedIds = [];
+    		$scope.updateSelection = function($event,id) {
+    			if($event.target.checked) {
+    				$scope.selectedIds.push(id);
+    				console.log($scope.selectedIds)
+    			} else {
+    				var index = $scope.selectedIds.indexOf(id);
+    				$scope.selectedIds.splice(index, 1);
+    				
+    			}
+    			
+    		}
+    
+    		$scope.dele = function() {
+    			if(confirm('你确定要删除该条信息吗？')) {
+    				$http.get(uri + 'deleteInfo?ids=' + $scope.selectedIds).success(function(response) {
+    					if(response.success=true) {
+    						console.log(response)
+    						$scope.findAllInfo();
+    						//window.location.reload();
+    					} else {
+    						alert('操作失败！');
+    					}
+    				});
+    			}
+    		}
+    
+    		//分页控件配置currentPage:当前页   totalItems :总记录数  itemsPerPage:每页记录数  perPageOptions :分页选项  onChange:当页码变更后自动触发的方法 
+    		$scope.paginationConf = {
+    			currentPage: 1,
+    			totalItems: 3,
+    			itemsPerPage: 5,
+    			perPageOptions: [5, 10, 20, 30, 40, 50],
+    			onChange: function() {
+    				$scope.reloadList();
+    			}
+    		};
+    
+    		$scope.reloadList = function() {
+    			$scope.findByPage($scope.paginationConf.currentPage, $scope.paginationConf.itemsPerPage);
+    
+    		}
+    
+    		$scope.findByPage = function(page_no, page_size) {
+    			$http.get(uri + 'findByInfoPage?pageNo=' + page_no + '&pageSize=' + page_size).success(function(response) {
+    				$scope.list = response.rows;
+    				$scope.paginationConf.totalItems = response.total;
+    			});
+    		}
+    		
+    		
+    		//$scope.status = ["无效","有效"];
+
+    	
+	// 文件上传的方法:
+	$scope.uploadFile = function(){
+
+
+		uploadService.uploadFile().then(function(response){
+			if(response){
+				$scope.entity.pic = response.message;
+			}else{
+				alert(response.message);
+			}
+		});
+	}
+    		
+    		
+    	});
+    	
+    </script>
+</head>
+<body class="hold-transition skin-red sidebar-mini" ng-app="AdverApp" ng-controller="AdverController" ng-init="findByUserId(entity.userId)" >
+  		
+  	
+  <!-- .box-body -->
+
+
+                    <div class="box-body">
+
+                        <!-- 数据表格 -->
+                        <div class="table-box">
+
+                            <!--工具栏-->
+                            <div class="pull-left">
+                                <div class="form-group form-inline">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default" title="新建" data-toggle="modal" data-target="#editModal" ng-click="entity={}"><i class="fa fa-file-o"></i>上传</button>
+                                        <button type="button" class="btn btn-default" title="删除" ng-click="dele()"><i class="fa fa-trash-o"></i> 删除</button>           
+                                        <button type="button" class="btn btn-default" title="刷新" onclick="window.location.reload();"><i class="fa fa-refresh"></i> 刷新</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-tools pull-right">
+                                <div class="has-feedback">							       
+                                </div>
+                            </div>
+                            <!--工具栏/-->
+
+			                  <!--数据列表-->
+			                  <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+			                      <thead>
+			                          <tr>
+			                              <th class="" style="padding-right:0px">
+			                                  <input id="selall" type="checkbox" class="icheckbox_square-blue">
+			                              </th> 
+										                <th class="sorting"></th>			
+                                     <th class="sorting">心电图ID</th>			
+                                     <th class="sorting">用户ID</th>
+                                     <th class="sorting">心电图链接</th>		
+                                     <th class="sorting">图片</th>
+                                     <th class="sorting">健康状况</th>			
+                                     <th class="sorting">是否为患者</th>	
+                                     <th class="sorting">创建时间</th>			
+                                     <th class="sorting">备注</th>	
+                                     <th class="text-center">操作</th>
+			                          </tr>
+			                      </thead>
+			                      <tbody>
+			                          <tr>
+                                  <!-- ng-repeat="entity in list" -->
+			                              <td><input  type="checkbox" ng-click="updateSelection($event,entity.id)"></td>			                              
+                                     <td>{{entity.id}}</td>
+                                     <td>{{entity.userId}}</td>
+                                     <td>{{entity.url}}</td>	
+                                     <td><image src="{{entity.pic}}" width="100" height="50"></td>		
+                                     <td>{{entity.healthy}}</td>			
+                                     <td>{{entity.huanzhe}}</td>			
+                                     <td>{{entity.createTime}}</td>			
+		                                 <td>{{entity.beizhu}}</td>
+		                                  <td class="text-center">                                           
+		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" ng-click="findOneContent(entity.id)" >修改</button>                                           
+		                                  </td>
+			                          </tr>									 
+			                      </tbody>
+			                  </table>
+			                  <!--数据列表/-->                        
+                        </div>
+                        <!-- 数据表格 /-->
+                        <!-- 分页 -->
+						<tm-pagination conf="paginationConf"></tm-pagination>
+                     </div>
+                    <!-- /.box-body
+         
+<!-- 编辑窗口 -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" >
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="myModalLabel">编辑</h3>
+		</div>
+		<div class="modal-body">	
+			 <table class="table table-bordered table-striped"  width="800px">			
+		      <tr>
+            <td>心电图ID</td>
+            <td><input class="form-control" ng-model="entity.id"></input>
+            <!--ng-options="item.id as item.name for item in contentCategoryList"--></td>
+          </tr>		
+		      <tr>                         
+            <td>用户ID</td>
+            <td><input  class="form-control" ng-model="entity.userId"></td>
+          </tr>		
+		      <tr>                  
+            <td>心电图链接</td>
+            <td><input  class="form-control" ng-model="entity.url" placeholder="链接" ></td>
+          </tr>		
+		      <tr>               
+             <td>图片绝对路径</td>
+              <td>
+                <input type="file" id="file"/>
+                <input type="button" value="上传" ng-click="uploadFile()"/>
+                <img src="{{entity.pic}}" width="200" height="100">
+              </td>
+          </tr>		
+		      <tr>                        
+            <td>健康状况</td>
+            <td>
+              <select class="form-control" ng-model="entity.healthy"/>
+                <option value="健康"></option>
+                <option value="良好"></option>
+                <option value="一般"></option>
+              </select>
+            </td>
+           </tr>		
+		      <tr>
+            <td>是否为患者</td>
+            <td><input  class="form-control" ng-model="entity.huanzhe" placeholder="是" ></td>
+           </tr>		
+		  		      	
+			 </table>				
+		</div>
+		<div class="modal-footer">						
+			<button class="btn btn-success" data-dismiss="modal" aria-hidden="true" ng-click="save()">保存</button>
+			<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+		</div>
+	  </div>
+	</div>
+</div>
+   
+</body>
+</html>

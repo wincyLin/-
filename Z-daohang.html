@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>心电图管理系统</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <link rel="stylesheet" type="text/css" href="css/daohang.css"/>
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+	<script type="text/javascript" src="jQuery/jquery-2.2.3.min.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"> </script>
+  <script type="text/javascript" src="angularjs/angular.min.js"></script>
+  
+  <script type="text/javascript">
+   
+     
+  	var uri = "http://localhost:8082/";
+  	var app = angular.module('userApp', []);
+  	app.controller('userController', function($scope, $http) {
+     $scope.findByUserName = function(userName) {
+      
+       var userName = sessionStorage.getItem("userName");
+     	$http.get(uri + 'findByUserName/' + userName).success(function(response) {
+         //console.log(userName)
+         $scope.entity = response;
+         // console.log($scope.entity)
+         // console.log(response.userId)
+         var userId = response.userId;
+         sessionStorage.setItem("userId",userId); 
+         console.log(userId)
+     	});
+     	//console.log($scope.entity)
+     }
+     
+     $scope.findOneUser = function(userId) {
+       var userId = sessionStorage.getItem("userId");
+     	$http.get(uri + 'findOneUser/' + userId).success(function(response) {
+     		$scope.entity = response;
+         console.log($scope.entity)
+     	});
+     	
+     }
+      
+     });
+  
+  
+  		  $(function(){
+  		        $(".mt-2 li").on("click",function(){
+  		            var address =$(this).attr("data-src");
+  		             $("iframe").attr("src",address);
+  		            });
+  		        });
+  		
+  	</script>
+</head>
+<body class="hold-transition skin--blue sidebar-mini" ng-app="userApp" ng-controller="userController" ng-init="findByUserName(entity.userName)">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="index3.html" class="nav-link">个人中心</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="#" class="nav-link">后台管理页面</a>
+      </li>
+    </ul>
+
+
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link" style="padding-left: 2.5rem;">
+      <span class="brand-text font-weight-light">心电图管理系统</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+       <div class="image">
+          <img src="image/touxiang.png" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="Z-geren.html" class="d-block">{{entity.userName}}</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          
+          <li class="nav-item" data-src="Z-content.html">
+             <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-image"></i>
+              <p>
+                心电图管理
+              </p>
+             </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-upload"></i>
+              <p>
+                上传心电图
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-link"></i>
+              <p>
+                国外心电数据库链接
+                 <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="http://ecg.mit.edu/" class="nav-link active">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>美国MIT-BIH心电数据库</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="https://www.ecri.org/american-heart-association-ecg-database-usb" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>美国AHA心电数据库</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-home"></i>
+              <p>
+                系统设置
+                 <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+           
+          </li>
+          <li class="nav-item" data-src="Z-geren.html">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                个人中心
+                 <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+         
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">后台管理页面</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">个人中心</a></li>
+              <li class="breadcrumb-item active">后台管理页面</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div id="content">
+ <!--     <div id="container-fluid"> -->
+       <iframe src="Z-content.html" frameborder="1px" name="iframe_a"></iframe>
+
+    </div>
+
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+    <div class="p-3">
+      <h5>Title</h5>
+      <p>Sidebar content</p>
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+
+  <!-- Main Footer -->
+
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.min.js"></script>
+</body>
+</html>
